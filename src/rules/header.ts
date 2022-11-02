@@ -1,5 +1,24 @@
 import eslint from 'eslint'
-export default {
+import { getLeadingComment } from '../commentHelper'
+
+type CommentType = 'line' | 'block'
+type CommentOptions = {
+    allow: CommentType | 'both'
+    prefer: CommentType
+}
+
+type Header = string[]
+
+type Options = [CommentOptions, Header]
+
+const replacements = {
+    '{YEAR}': {
+        match: () => /\d{4}/,
+        template: () => (new Date()).getFullYear()
+    }
+}
+
+module.exports = {
     meta: {
         type: 'suggestion', // `problem`, `suggestion`, or `layout`
         docs: {
@@ -8,12 +27,37 @@ export default {
             url: 'https://github.com/fallaciousreasoning/eslint-plugin-licenses',
         },
         fixable: 'code',
-        schema: [], // Add a schema if the rule has options
+        schema: [{
+            type: 'number'
+        }, {
+            type: 'string'
+        }, {
+            oneOf: [{
+                type: 'string'
+            }, {
+                type: 'array',
+                items: {
+                    type: 'string'
+                }
+            }]
+        }], // Add a schema if the rule has options
     },
 
     create(context) {
+        const options: Options = context.options as any
+        const comment = getLeadingComment(context);
+        console.log("FOund comment", comment)
         return {
+            Program(node) {
+                if (!comment) {
+                    context.report({
+                        loc: { line: 1, column: 1 },
+                        message: 'missing header',
 
+                    });
+                    return;
+                }
+            }
         }
     },
 } as eslint.Rule.RuleModule

@@ -20,12 +20,19 @@ const ruleTester = new RuleTester();
 ruleTester.run("header", rule, {
   valid: [
     // give me some code that won't trigger a warning
+    {
+      code: `
+// License Header
+var react = require('react');
+      `,
+      options: [2, 'line', ["License Header"] ]
+    }
   ],
 
   invalid: [
     {
-      code: "import * as React from 'react'",
-      errors: [{ message: "Fill me in.", type: "Me too" }],
+      code: "var react = require('react')",
+      errors: [{ message: "missing header", line: 1 }],
     },
   ],
 });
