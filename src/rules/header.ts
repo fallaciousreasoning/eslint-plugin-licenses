@@ -46,7 +46,7 @@ module.exports = {
     create(context) {
         const options: Options = context.options as any
         const comment = getLeadingComment(context);
-        console.log("FOund comment", comment)
+        console.error("FOund comment", comment)
         return {
             Program(node) {
                 if (!comment) {
