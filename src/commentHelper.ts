@@ -30,7 +30,7 @@ const generateCommentFromLines = (lines: string[], options: Options) => {
 }
 
 export const matchesComment = (context: Rule.RuleContext, node: Program, options: Options, comments: Comment[]) => {
-    comments = comments.slice(0, options.header.length);
+    comments = comments.slice(0, options.header.length + 1);
 
     const commentLines: {
         comment: Comment,
@@ -94,13 +94,12 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
         const first = badComments[0]
         context.report({
             loc: {
-                line: first.loc?.start.line ?? 1,
-                column: first.loc?.end.line ?? 1
+                line: comments[0].loc?.start.line ?? 1,
+                column: comments[0].loc?.end.column ?? 1
             },
             message: `invalid comment type (expected '${options.comments.allow}' but was '${first.type.toLowerCase()}')`,
             fix(fixer) {
-                const mode = options.comments.prefer;
-                const lines = comments.map(c => c.value);
+                const lines = comments.map(c => c.value.split('\n')).flatMap(c => c);
                 const start = comments[0].range![0];
                 const end = comments[comments.length - 1].range![1];
                 return fixer.replaceTextRange([start, end], generateCommentFromLines(lines, options))

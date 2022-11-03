@@ -142,6 +142,30 @@ var react = require('react');`
     },
     {
       code: `
+// License Header Line 1
+// License Header Line 2
+var react = require('react');`,
+      options: [2, 'block', ["License Header"]],
+      errors: [{ message: "invalid comment type (expected 'block' but was 'line')" }],
+      output: `
+/* License Header Line 1
+ License Header Line 2 */
+var react = require('react');`
+    },
+    {
+      code: `
+/* License Header Line 1
+ License Header Line 2 */
+var react = require('react');`,
+      options: [2, 'line', ["License Header"]],
+      errors: [{ message: "invalid comment type (expected 'line' but was 'block')" }],
+      output: `
+// License Header Line 1
+// License Header Line 2
+var react = require('react');`
+    },
+    {
+      code: `
 // Not the right header
 var react = require('react');`,
       options: [2, 'line', ["License Header"]],
