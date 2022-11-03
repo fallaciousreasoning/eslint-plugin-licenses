@@ -1,7 +1,7 @@
 import { Rule } from "eslint";
 import { Comment, Program } from 'estree'
 import { rules } from "./index";
-import { convertLine, generateTemplatedLine } from "./replacements";
+import { convertLine, generateTemplatedLine, lineMatches } from "./replacements";
 import { Options } from "./rules/header";
 
 export const getLeadingComments = (context: Rule.RuleContext) => {
@@ -23,11 +23,6 @@ const generateComment = (line: string, options: Options) => {
     return `${prefix}${padding}${generateTemplatedLine(line)}${suffix}`
 }
 
-const generateCommentContent = (line: string, options: Options) => {
-    const padding = ''.padStart(options.leadingSpaces, ' ')
-    return `${padding}${generateTemplatedLine(line)}`
-}
-
 export const matchesComment = (context: Rule.RuleContext, node: Program, options: Options, comments: Comment[]) => {
     if (options.header.length > comments.length) {
         context.report({
@@ -45,12 +40,11 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
     for (let i = 0; i < options.header.length; ++i) {
         const headerLine = options.header[i];
         const expected = ''.padStart(options.leadingSpaces, ' ') + headerLine;
-        const expectedRegex = convertLine(expected);
 
         const comment = comments[i];
         const actual = comment.value.trimEnd();
 
-        if (!expectedRegex.test(actual)) {
+        if (!lineMatches(expected, actual)) {
             context.report({
                 loc: comment.loc as any,
                 message: `incorrect license line (expected '${expected}' but was '${actual}')`,
@@ -59,8 +53,8 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
                     return fixer.replaceText(comment as any, generateComment(headerLine, options))
                 }
             })
-        }
-
+        } 
+        
         if (!isAllowedType(comment, options.comments.allow)) {
             context.report({
                 loc: comment.loc as any,

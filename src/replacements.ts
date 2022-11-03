@@ -1,6 +1,11 @@
-export const replacements = {
+export const replacements: {
+    [key: string]: {
+        match: () => RegExp,
+        template: () => string
+    }
+} = {
     '{YEAR}': {
-        match: () => /(?<YEAR>\d{4})/,
+        match: () => /\d{4}/,
         template: () => (new Date()).getFullYear()?.toString()
     }
 }
@@ -8,8 +13,36 @@ export const replacements = {
 export const convertLine = (line: string) => {
     for (const [replace, entry] of Object.entries(replacements)) {
         line = line.replace(replace, entry.match().source)
+        console.log(line)
     }
-    return new RegExp(line);
+    return new RegExp(line, 'g');
+}
+
+export const lineMatches = (headerLine: string, comment: string) => {
+    const parts = headerLine
+        .split(/(\{[a-zA-Z]+\})/)
+    let index = 0;
+
+    for (let i = 0; i < parts.length; ++i) {
+        const part = parts[i];
+        const replacement = replacements[part];
+        if (!replacement) {
+            const ss = comment.substring(index, index + part.length)
+            if (part !== ss) {
+                console.log(part, '!==', ss)
+                return false;
+            }
+            index += part.length;
+            continue
+        }
+
+        const match = replacement.match().exec(comment.substring(index));
+        if (!match) return false
+        
+        index += match[0].length;
+    }
+
+    return true;
 }
 
 export const generateTemplatedLine = (line: string) => {
