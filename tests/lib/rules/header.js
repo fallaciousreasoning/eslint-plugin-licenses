@@ -68,6 +68,26 @@ var react = require('react');`,
       output:`
 /* License Header */
 var react = require('react');`
+    },
+    {
+      code: `
+// Not the right header
+var react = require('react');`,
+      options: [2, 'line', ["License Header"] ],
+      errors: [{ message: "incorrect license line (expected ' License Header' but was ' Not the right header')" }],
+      output:`
+// License Header
+var react = require('react');`
+    },
+    {
+      code: `
+/* Not the right header */
+var react = require('react');`,
+      options: [2, 'block', ["License Header"] ],
+      errors: [{ message: "incorrect license line (expected ' License Header' but was ' Not the right header')" }],
+      output:`
+/* License Header */
+var react = require('react');`
     }
   ],
 });

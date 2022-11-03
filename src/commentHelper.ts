@@ -23,8 +23,12 @@ const generateComment = (line: string, options: Options) => {
     return `${prefix}${padding}${generateTemplatedLine(line)}${suffix}`
 }
 
+const generateCommentContent = (line: string, options: Options) => {
+    const padding = ''.padStart(options.leadingSpaces, ' ')
+    return `${padding}${generateTemplatedLine(line)}`
+}
+
 export const matchesComment = (context: Rule.RuleContext, node: Program, options: Options, comments: Comment[]) => {
-    let errors = []
     if (options.header.length > comments.length) {
         context.report({
             loc: { line: 1, column: 1 },
@@ -51,6 +55,9 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
                 loc: comment.loc as any,
                 message: `incorrect license line (expected '${expected}' but was '${actual}')`,
                 node: comment as any,
+                fix(fixer) {
+                    return fixer.replaceText(comment as any, generateComment(headerLine, options))
+                }
             })
         }
 
