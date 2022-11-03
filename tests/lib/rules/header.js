@@ -61,6 +61,34 @@ var react = require('react');
 var react = require('react');
       `,
       options: [2, 'block', ["License Header"]]
+    },
+    {
+      code: `
+/* License Header */
+var react = require('react');
+      `,
+      options: [2, 'both', ["License Header"]]
+    },
+    {
+      code: `
+// License Header
+var react = require('react');
+      `,
+      options: [2, 'both', ["License Header"]]
+    },
+    {
+      code: `
+// License Header
+var react = require('react');
+      `,
+      options: [2, { prefer: 'line', allow: 'both' }, ["License Header"]]
+    },
+    {
+      code: `
+// License Header
+var react = require('react');
+      `,
+      options: [2, { prefer: 'block', allow: 'both' }, ["License Header"]]
     }
   ],
 

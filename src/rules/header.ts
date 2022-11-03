@@ -33,7 +33,20 @@ module.exports = {
         schema: [{
             type: 'number'
         }, {
-            type: 'string'
+            oneOf: [
+                { type: 'string', enum: ['line', 'block', 'both'] },
+                {
+                    type: 'object',
+                    properties: {
+                        allow: {
+                            enum: ['line', 'block', 'both']
+                        },
+                        prefer: {
+                            enum: ['line', 'block']
+                        }
+                    }
+                }
+            ]
         }, {
             oneOf: [{
                 type: 'string'
