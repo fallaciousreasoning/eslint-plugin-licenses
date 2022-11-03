@@ -12,7 +12,7 @@ export const getLeadingComments = (context: Rule.RuleContext) => {
 }
 
 const isAllowedType = (comment: Comment, modes: 'line' | 'block' | 'both') => {
-    return comment.type.toLowerCase() != modes && modes != 'both';
+    return comment.type.toLowerCase() === modes || modes === 'both';
 }
 
 export const matchesComment = (context: Rule.RuleContext, options: Options, comments: Comment[]) => {
@@ -35,6 +35,13 @@ export const matchesComment = (context: Rule.RuleContext, options: Options, comm
                 loc: comment.loc as any,
                 message: `incorrect license line (expected '${expected}' but was '${actual}')`,
                 node: comment as any
+            })
+        }
+
+        if (!isAllowedType(comment, options.comments.allow)) {
+            context.report({
+                loc: comment.loc as any,
+                message: `invalid comment type (expected '${options.comments.allow}' but was '${comment.type.toLowerCase()}')`
             })
         }
     }

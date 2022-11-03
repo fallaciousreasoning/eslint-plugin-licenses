@@ -42,5 +42,21 @@ var react = require('react');
       options: [2, 'line', ['License Header'] ],
       errors: [{ message: "missing license", line: 1 }],
     },
+    {
+      code: `
+/* License Header */
+var react = require('react');
+      `,
+      options: [2, 'line', ["License Header"] ],
+      errors: [{ message: "invalid comment type (expected 'line' but was 'block')" }],
+    },
+    {
+      code: `
+// License Header
+var react = require('react');
+      `,
+      options: [2, 'block', ["License Header"] ],
+      errors: [{ message: "invalid comment type (expected 'block' but was 'line')" }],
+    }
   ],
 });
