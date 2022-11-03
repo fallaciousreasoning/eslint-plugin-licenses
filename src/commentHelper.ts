@@ -26,8 +26,8 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
                 return fixer.insertTextBefore(node, options.header
                     .map(line => generateTemplatedLine(line))
                     .map(l => ''.padStart(options.leadingSpaces, ' ') + l)
-                    .map(l => options.comments.prefer === 'block' ? '' : '//')
-                    .join('\n'))
+                    .map(l => options.comments.prefer === 'block' ? '' : '//' + l)
+                    .join('\n') + ''.padEnd(options.trailingNewLines + 1, '\n'))
             }
         });
         return;

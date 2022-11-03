@@ -47,6 +47,9 @@ var react = require('react');
       code: "var react = require('react')",
       options: [2, 'line', ['License Header'] ],
       errors: [{ message: "missing license", line: 1 }],
+      output: `// License Header
+
+var react = require('react')`
     },
     {
       code: `
