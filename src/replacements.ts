@@ -10,14 +10,6 @@ export const replacements: {
     }
 }
 
-export const convertLine = (line: string) => {
-    for (const [replace, entry] of Object.entries(replacements)) {
-        line = line.replace(replace, entry.match().source)
-        console.log(line)
-    }
-    return new RegExp(line, 'g');
-}
-
 export const lineMatches = (headerLine: string, comment: string) => {
     const parts = headerLine
         .split(/(\{[a-zA-Z]+\})/)

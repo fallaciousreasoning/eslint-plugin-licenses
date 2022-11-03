@@ -1,7 +1,6 @@
 import { Rule } from "eslint";
-import { Comment, Program } from 'estree'
-import { rules } from "./index";
-import { convertLine, generateTemplatedLine, lineMatches } from "./replacements";
+import { Comment, Program } from 'estree';
+import { generateTemplatedLine, lineMatches } from "./replacements";
 import { Options } from "./rules/header";
 
 export const getLeadingComments = (context: Rule.RuleContext) => {
