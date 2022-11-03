@@ -1,6 +1,7 @@
 import { Rule } from "eslint";
-import { Comment } from 'estree'
+import { Comment, Program } from 'estree'
 import { rules } from "./index";
+import { convertLine, generateTemplatedLine } from "./replacements";
 import { Options } from "./rules/header";
 
 export const getLeadingComments = (context: Rule.RuleContext) => {
@@ -15,26 +16,35 @@ const isAllowedType = (comment: Comment, modes: 'line' | 'block' | 'both') => {
     return comment.type.toLowerCase() === modes || modes === 'both';
 }
 
-export const matchesComment = (context: Rule.RuleContext, options: Options, comments: Comment[]) => {
+export const matchesComment = (context: Rule.RuleContext, node: Program, options: Options, comments: Comment[]) => {
     let errors = []
     if (options.header.length > comments.length) {
         context.report({
             loc: { line: 1, column: 1 },
-            message: 'missing license'
+            message: 'missing license',
+            fix(fixer) {
+                return fixer.insertTextBefore(node, options.header
+                    .map(line => generateTemplatedLine(line))
+                    .map(l => ''.padStart(options.leadingSpaces, ' ') + l)
+                    .map(l => options.comments.prefer === 'block' ? '' : '//')
+                    .join('\n'))
+            }
         });
         return;
     }
 
     for (let i = 0; i < options.header.length; ++i) {
         const expected = ''.padStart(options.leadingSpaces, ' ') + options.header[i];
+        const expectedRegex = convertLine(expected);
+
         const comment = comments[i];
         const actual = comment.value.trimEnd();
 
-        if (expected !== actual) {
+        if (!expectedRegex.test(actual)) {
             context.report({
                 loc: comment.loc as any,
                 message: `incorrect license line (expected '${expected}' but was '${actual}')`,
-                node: comment as any
+                node: comment as any,
             })
         }
 

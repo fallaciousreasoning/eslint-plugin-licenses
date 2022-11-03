@@ -21,14 +21,6 @@ export interface Options {
     header: Header
 }
 
-const replacements = {
-    '{YEAR}': {
-        match: () => /\d{4}/,
-        template: () => (new Date()).getFullYear()
-    }
-}
-
-
 module.exports = {
     meta: {
         type: 'suggestion', // `problem`, `suggestion`, or `layout`
@@ -60,7 +52,7 @@ module.exports = {
 
         return {
             Program(node) {
-                matchesComment(context, {
+                matchesComment(context, node, {
                     comments: typeof mode === "string" ? {
                         allow: mode,
                         prefer: mode

@@ -19,13 +19,19 @@ const rule = require("../../../lib/rules/header"),
 const ruleTester = new RuleTester();
 ruleTester.run("header", rule, {
   valid: [
-    // give me some code that won't trigger a warning
     {
       code: `
 // License Header
 var react = require('react');
       `,
       options: [2, 'line', ["License Header"] ]
+    },
+    {
+      code: `
+// License Header 2022
+var react = require('react');
+      `,
+      options: [2, 'line', ["License Header {YEAR}"] ]
     },
     {
       code: `
