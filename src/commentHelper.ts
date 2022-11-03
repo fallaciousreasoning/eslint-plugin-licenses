@@ -23,13 +23,15 @@ const generateComment = (line: string, commentOptions: { isFirstLine: boolean, i
     return `${padding}${generateTemplatedLine(line)}${commentOptions.isLastLine && commentOptions.type === 'block' ? padding : ''}`
 }
 
-const generateCommentFromLines = (lines: string[], mode: 'block' | 'line') => {
-    return mode === 'block'
-        ? `/*${lines.join('\n')}*/`
+const generateCommentFromLines = (lines: string[], options: Options) => {
+    return options.comments.prefer === 'block'
+        ? `/*${lines.map(l => l.trimEnd()).join('\n')}${''.padEnd(options.leadingSpaces, ' ')}*/`
         : lines.map(l => `//${l}`).join('\n')
 }
 
 export const matchesComment = (context: Rule.RuleContext, node: Program, options: Options, comments: Comment[]) => {
+    comments = comments.slice(0, options.header.length);
+
     const commentLines: {
         comment: Comment,
         line: string
@@ -55,7 +57,7 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
                             type: options.comments.prefer,
                             isFirstLine: i === 0,
                             isLastLine: i === options.header.length - 1
-                        }, options)), options.comments.prefer)
+                        }, options)), options)
                     + ''.padEnd(options.trailingNewLines + 1, '\n'))
             }
         });
@@ -85,19 +87,25 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
                 }
             })
         }
+    }
 
-        // if (!isAllowedType(comment, options.comments.allow)) {
-        //     context.report({
-        //         loc: comment.loc as any,
-        //         message: `invalid comment type (expected '${options.comments.allow}' but was '${comment.type.toLowerCase()}')`,
-        //         fix(fixer) {
-        //             return fixer.replaceText(comment as any, generateComment(headerLine, {
-        //                 type: options.comments.prefer,
-        //                 isFirstLine: i === 0,
-        //                 isLastLine: i === options.header.length - 1
-        //             }, options))
-        //         }
-        //     })
+    const badComments = comments.filter(c => !isAllowedType(c, options.comments.allow));
+    if (badComments.length) {
+        const first = badComments[0]
+        context.report({
+            loc: {
+                line: first.loc?.start.line ?? 1,
+                column: first.loc?.end.line ?? 1
+            },
+            message: `invalid comment type (expected '${options.comments.allow}' but was '${first.type.toLowerCase()}')`,
+            fix(fixer) {
+                const mode = options.comments.prefer;
+                const lines = comments.map(c => c.value);
+                const start = comments[0].range![0];
+                const end = comments[comments.length - 1].range![1];
+                return fixer.replaceTextRange([start, end], generateCommentFromLines(lines, options))
+            }
+        })
     }
 }
 
