@@ -18,7 +18,8 @@ export interface Options {
 
     // Number of trailing newlines after the header.
     trailingNewLines: number,
-    header: Header
+    header: Header,
+    altHeaders: Header[]
 }
 
 module.exports = {
@@ -72,7 +73,8 @@ module.exports = {
                     } : mode as any,
                     header: header,
                     leadingSpaces: 1,
-                    trailingNewLines: 1
+                    trailingNewLines: 1,
+                    altHeaders: []
                 }, comments)
             }
         }
