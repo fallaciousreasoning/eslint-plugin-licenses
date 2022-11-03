@@ -26,7 +26,7 @@ const generateComment = (line: string, commentOptions: { isFirstLine: boolean, i
 const generateCommentFromLines = (lines: string[], options: Options) => {
     return options.comments.prefer === 'block'
         ? `/*${lines.map(l => l.trimEnd()).join('\n')}${''.padEnd(options.leadingSpaces, ' ')}*/`
-        : lines.map(l => `//${l}`).join('\n')
+        : lines.map(l => `//${l.trimEnd()}`).join('\n')
 }
 
 export const matchesComment = (context: Rule.RuleContext, node: Program, options: Options, comments: Comment[]) => {
