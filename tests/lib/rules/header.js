@@ -26,13 +26,21 @@ ruleTester.run("header", rule, {
 var react = require('react');
       `,
       options: [2, 'line', ["License Header"] ]
+    },
+    {
+      code: `
+/* License Header */
+var react = require('react');
+      `,
+      options: [2, 'block', ["License Header"] ]
     }
   ],
 
   invalid: [
     {
       code: "var react = require('react')",
-      errors: [{ message: "missing header", line: 1 }],
+      options: [2, 'line', ['License Header'] ],
+      errors: [{ message: "missing license", line: 1 }],
     },
   ],
 });

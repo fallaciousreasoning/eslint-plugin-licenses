@@ -1,5 +1,5 @@
 import eslint from 'eslint'
-import { getLeadingComment } from '../commentHelper'
+import { getLeadingComments, matchesComment } from '../commentHelper'
 
 type CommentType = 'line' | 'block'
 type CommentOptions = {
@@ -9,7 +9,17 @@ type CommentOptions = {
 
 type Header = string[]
 
-type Options = [CommentOptions, Header]
+type OptionsArr = [string | number, string | CommentOptions, Header]
+export interface Options {
+    comments: CommentOptions,
+
+    // Number of spaces before each line of the comment.
+    leadingSpaces: number,
+
+    // Number of trailing newlines after the header.
+    trailingNewLines: number,
+    header: Header
+}
 
 const replacements = {
     '{YEAR}': {
@@ -17,6 +27,7 @@ const replacements = {
         template: () => (new Date()).getFullYear()
     }
 }
+
 
 module.exports = {
     meta: {
@@ -44,19 +55,20 @@ module.exports = {
     },
 
     create(context) {
-        const options: Options = context.options as any
-        const comment = getLeadingComment(context);
-        console.error("FOund comment", comment)
+        const [level, mode, header] = context.options as OptionsArr
+        const comments = getLeadingComments(context);
+
         return {
             Program(node) {
-                if (!comment) {
-                    context.report({
-                        loc: { line: 1, column: 1 },
-                        message: 'missing header',
-
-                    });
-                    return;
-                }
+                matchesComment(context, {
+                    comments: typeof mode === "string" ? {
+                        allow: mode,
+                        prefer: mode
+                    } : mode as any,
+                    header: header,
+                    leadingSpaces: 1,
+                    trailingNewLines: 1
+                }, comments)
             }
         }
     },
