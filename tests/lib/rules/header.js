@@ -52,12 +52,12 @@ var react = require('react');
 var react = require('react')`
     },
     {
-      code: `
-/* License Header */
-var react = require('react');
-      `,
+      code: `/* License Header */
+var react = require('react');`,
       options: [2, 'line', ["License Header"] ],
       errors: [{ message: "invalid comment type (expected 'line' but was 'block')" }],
+      output: `// License Header
+var react = require('react');`
     },
     {
       code: `

@@ -16,6 +16,12 @@ const isAllowedType = (comment: Comment, modes: 'line' | 'block' | 'both') => {
     return comment.type.toLowerCase() === modes || modes === 'both';
 }
 
+const generateComment = (line: string, options: Options) => {
+    const padding = ''.padStart(options.leadingSpaces, ' ')
+    const prefix = options.comments.prefer === 'line' ? '//' : ''
+    return `${prefix}${padding}${generateTemplatedLine(line)}`
+}
+
 export const matchesComment = (context: Rule.RuleContext, node: Program, options: Options, comments: Comment[]) => {
     let errors = []
     if (options.header.length > comments.length) {
@@ -24,9 +30,7 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
             message: 'missing license',
             fix(fixer) {
                 return fixer.insertTextBefore(node, options.header
-                    .map(line => generateTemplatedLine(line))
-                    .map(l => ''.padStart(options.leadingSpaces, ' ') + l)
-                    .map(l => options.comments.prefer === 'block' ? '' : '//' + l)
+                    .map(l => generateComment(l, options))
                     .join('\n') + ''.padEnd(options.trailingNewLines + 1, '\n'))
             }
         });
@@ -34,7 +38,8 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
     }
 
     for (let i = 0; i < options.header.length; ++i) {
-        const expected = ''.padStart(options.leadingSpaces, ' ') + options.header[i];
+        const headerLine = options.header[i];
+        const expected = ''.padStart(options.leadingSpaces, ' ') + headerLine;
         const expectedRegex = convertLine(expected);
 
         const comment = comments[i];
@@ -51,7 +56,10 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
         if (!isAllowedType(comment, options.comments.allow)) {
             context.report({
                 loc: comment.loc as any,
-                message: `invalid comment type (expected '${options.comments.allow}' but was '${comment.type.toLowerCase()}')`
+                message: `invalid comment type (expected '${options.comments.allow}' but was '${comment.type.toLowerCase()}')`,
+                fix(fixer) {
+                    return fixer.replaceText(comment as any, generateComment(headerLine, options))
+                }
             })
         }
     }
