@@ -11,6 +11,10 @@ export const replacements: {
 }
 
 export const lineMatches = (headerLine: string, comment: string) => {
+    if (headerLine.trim().length === 0 && comment.trim().length === 0) {
+        return true;
+    }
+
     const parts = headerLine
         .split(/(\{[a-zA-Z]+\})/)
     let index = 0;

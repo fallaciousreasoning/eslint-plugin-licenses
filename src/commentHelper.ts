@@ -18,11 +18,19 @@ const isAllowedType = (comment: Comment, modes: 'line' | 'block' | 'both') => {
     return comment.type.toLowerCase() === modes || modes === 'both';
 }
 
-const generateComment = (line: string, options: Options) => {
+const generateComment = (line: string, commentOptions: { isFirstLine: boolean, isLastLine: boolean }, options: Options) => {
     const padding = ''.padStart(options.leadingSpaces, ' ')
-    const prefix = options.comments.prefer === 'line' ? '//' : '/*'
-    const suffix = options.comments.prefer === 'line' ? '' : `${padding}*/`
-    return `${prefix}${padding}${generateTemplatedLine(line)}${suffix}`
+    const prefix = options.comments.prefer === 'line'
+        ? '//'
+        : commentOptions.isFirstLine
+            ? '/*'
+            : '';
+    const suffix = options.comments.prefer === 'line'
+        ? ''
+        : commentOptions.isLastLine
+            ? '*/'
+            : ''
+    return `${prefix}${padding}${generateTemplatedLine(line)}${padding}${suffix}`.trimEnd()
 }
 
 export const matchesComment = (context: Rule.RuleContext, node: Program, options: Options, comments: Comment[]) => {
@@ -46,7 +54,10 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
             message: 'missing license',
             fix(fixer) {
                 return fixer.insertTextBefore(node, options.header
-                    .map(l => generateComment(l, options))
+                    .map((l, i) => generateComment(l, {
+                        isFirstLine: i === 0,
+                        isLastLine: i === options.header.length - 1
+                    }, options))
                     .join('\n') + ''.padEnd(options.trailingNewLines + 1, '\n'))
             }
         });
@@ -69,7 +80,10 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
                     const start = comment.value.indexOf(line) + comment.range![0]
                     // Add two for line comments (//) add four for block (/**/)
                     const end = start + line.length + (comment.type === 'Block' ? 4  :2)
-                    return fixer.replaceTextRange([start, end], generateComment(headerLine, options))
+                    return fixer.replaceTextRange([start, end], generateComment(headerLine, {
+                        isFirstLine: i === 0,
+                        isLastLine: i === options.header.length - 1
+                    }, options))
                 }
             })
         } 
@@ -79,7 +93,10 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
                 loc: comment.loc as any,
                 message: `invalid comment type (expected '${options.comments.allow}' but was '${comment.type.toLowerCase()}')`,
                 fix(fixer) {
-                    return fixer.replaceText(comment as any, generateComment(headerLine, options))
+                    return fixer.replaceText(comment as any, generateComment(headerLine, {
+                        isFirstLine: i === 0,
+                        isLastLine: i === options.header.length - 1
+                    }, options))
                 }
             })
         }
