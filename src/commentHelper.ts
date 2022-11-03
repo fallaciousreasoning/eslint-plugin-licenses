@@ -3,12 +3,15 @@ import { Comment, Program } from 'estree';
 import { generateTemplatedLine, lineMatches } from "./replacements";
 import { Options } from "./rules/header";
 
-export const getLeadingComments = (context: Rule.RuleContext) => {
+export const getLeadingComments = (context: Rule.RuleContext, node: Program) => {
     const sourceCode = context.getSourceCode()
-    const firstToken = sourceCode.getFirstToken(sourceCode.ast)
-    if (!firstToken) return []
+    const leading = sourceCode.getCommentsBefore(node);
+    
+    if (leading.length && leading[0].type === "Block") {
+        return [leading[0]];
+    }
 
-    return sourceCode.getCommentsBefore(firstToken)
+    return leading;
 }
 
 const isAllowedType = (comment: Comment, modes: 'line' | 'block' | 'both') => {
@@ -23,7 +26,21 @@ const generateComment = (line: string, options: Options) => {
 }
 
 export const matchesComment = (context: Rule.RuleContext, node: Program, options: Options, comments: Comment[]) => {
-    if (options.header.length > comments.length) {
+    const commentLines: {
+        comment: Comment,
+        line: string
+    }[] = []
+    for (const comment of comments) {
+        const splitLines = comment.value.split('\n');
+        for (const line of splitLines) {
+            commentLines.push({ 
+                line,
+                comment
+            })
+        }
+    }
+
+    if (options.header.length > commentLines.length) {
         context.report({
             loc: { line: 1, column: 1 },
             message: 'missing license',
@@ -40,8 +57,8 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
         const headerLine = options.header[i];
         const expected = ''.padStart(options.leadingSpaces, ' ') + headerLine;
 
-        const comment = comments[i];
-        const actual = comment.value.trimEnd();
+        const { comment, line} = commentLines[i];
+        const actual = line.trimEnd();
 
         if (!lineMatches(expected, actual)) {
             context.report({
@@ -49,7 +66,10 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
                 message: `incorrect license line`,
                 node: comment as any,
                 fix(fixer) {
-                    return fixer.replaceText(comment as any, generateComment(headerLine, options))
+                    const start = comment.value.indexOf(line) + comment.range![0]
+                    // Add two for line comments (//) add four for block (/**/)
+                    const end = start + line.length + (comment.type === 'Block' ? 4  :2)
+                    return fixer.replaceTextRange([start, end], generateComment(headerLine, options))
                 }
             })
         } 

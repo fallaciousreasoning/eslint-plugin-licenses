@@ -61,10 +61,10 @@ module.exports = {
 
     create(context) {
         const [level, mode, header] = context.options as OptionsArr
-        const comments = getLeadingComments(context);
 
         return {
             Program(node) {
+                const comments = getLeadingComments(context, node);
                 matchesComment(context, node, {
                     comments: typeof mode === "string" ? {
                         allow: mode,
