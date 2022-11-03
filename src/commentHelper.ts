@@ -18,8 +18,9 @@ const isAllowedType = (comment: Comment, modes: 'line' | 'block' | 'both') => {
 
 const generateComment = (line: string, options: Options) => {
     const padding = ''.padStart(options.leadingSpaces, ' ')
-    const prefix = options.comments.prefer === 'line' ? '//' : ''
-    return `${prefix}${padding}${generateTemplatedLine(line)}`
+    const prefix = options.comments.prefer === 'line' ? '//' : '/*'
+    const suffix = options.comments.prefer === 'line' ? '' : `${padding}*/`
+    return `${prefix}${padding}${generateTemplatedLine(line)}${suffix}`
 }
 
 export const matchesComment = (context: Rule.RuleContext, node: Program, options: Options, comments: Comment[]) => {
