@@ -49,16 +49,20 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
     if (options.header.length > commentLines.length) {
         context.report({
             loc: { line: 1, column: 1 },
-            message: 'missing license',
+            message: comments.length ? 'incorrect license' : 'missing license',
             fix(fixer) {
-                return fixer.insertTextBefore(node,
-                    generateCommentFromLines(options.header
-                        .map((l, i) => generateComment(l, {
-                            type: options.comments.prefer,
-                            isFirstLine: i === 0,
-                            isLastLine: i === options.header.length - 1
-                        }, options)), options)
-                    + ''.padEnd(options.trailingNewLines + 1, '\n'))
+                const comment = generateCommentFromLines(options.header
+                    .map((l, i) => generateComment(l, {
+                        type: options.comments.prefer,
+                        isFirstLine: i === 0,
+                        isLastLine: i === options.header.length - 1
+                    }, options)), options)
+                + ''.padEnd(options.trailingNewLines, '\n');
+
+                if (comments.length) {
+                    return fixer.replaceTextRange([comments[0].range![0], comments[comments.length - 1].range![1]], comment);
+                }
+                return fixer.insertTextBefore(node, comment + '\n');
             }
         });
         return;
