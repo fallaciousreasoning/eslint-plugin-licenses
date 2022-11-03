@@ -47,7 +47,7 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
         if (!lineMatches(expected, actual)) {
             context.report({
                 loc: comment.loc as any,
-                message: `incorrect license line (expected '${expected}' but was '${actual}')`,
+                message: `incorrect license line`,
                 node: comment as any,
                 fix(fixer) {
                     return fixer.replaceText(comment as any, generateComment(headerLine, options))
