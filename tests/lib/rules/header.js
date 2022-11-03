@@ -20,6 +20,7 @@ const ruleTester = new RuleTester();
 ruleTester.run("header", rule, {
   valid: [
     {
+      name: "Single line header is valid",
       code: `
 // License Header
 var react = require('react');
@@ -27,6 +28,7 @@ var react = require('react');
       options: [2, 'line', ["License Header"]]
     },
     {
+      name: "Single line header with year is valid",
       code: `
 // License Header 2022
 var react = require('react');
@@ -34,6 +36,7 @@ var react = require('react');
       options: [2, 'line', ["License Header {YEAR}"]]
     },
     {
+      name: "Single line header with year from a while back is valid",
       code: `
 // License Header 1999
 var react = require('react');
@@ -41,6 +44,7 @@ var react = require('react');
       options: [2, 'line', ["License Header {YEAR}"]]
     },
     {
+      name: "Multi line header with year is valid (line comments)",
       code: `
 // Copyright (c) 2022 The Brave Authors. All rights reserved.
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -56,6 +60,7 @@ var react = require('react');
       ]]
     },
     {
+      name: "Mult line header with year is valid (block comments)",
       code: `
 /*
  * Copyright (c) 2022 The Brave Authors. All rights reserved.
@@ -75,6 +80,7 @@ var react = require('react');
       ]]
     },
     {
+      name: "Single line header is valid (block comment)",
       code: `
 /* License Header */
 var react = require('react');
@@ -82,6 +88,7 @@ var react = require('react');
       options: [2, 'block', ["License Header"]]
     },
     {
+      name: "Single line header with non-preferred style is valid (block comment)",
       code: `
 /* License Header */
 var react = require('react');
@@ -89,6 +96,7 @@ var react = require('react');
       options: [2, 'both', ["License Header"]]
     },
     {
+      name: "Single line header with non-preferred style is valid (line comment)",
       code: `
 // License Header
 var react = require('react');
@@ -96,6 +104,7 @@ var react = require('react');
       options: [2, 'both', ["License Header"]]
     },
     {
+      name: "Single line header with non-preferred style is valid (line comment) (pref & allow)",
       code: `
 // License Header
 var react = require('react');
@@ -103,6 +112,7 @@ var react = require('react');
       options: [2, { prefer: 'line', allow: 'both' }, ["License Header"]]
     },
     {
+      name: "Single line header with non-preferred style is valid (block comment) (pref & allow)",
       code: `
 // License Header
 var react = require('react');
@@ -113,6 +123,7 @@ var react = require('react');
 
   invalid: [
     {
+      name: "Can add missing single line header",
       code: "var react = require('react')",
       options: [2, 'line', ['License Header']],
       errors: [{ message: "missing license", line: 1 }],
@@ -121,6 +132,7 @@ var react = require('react');
 var react = require('react')`
     },
     {
+      name: "Can convert single line header to line comments",
       code: `
 /* License Header */
 var react = require('react');`,
@@ -131,6 +143,7 @@ var react = require('react');`,
 var react = require('react');`
     },
     {
+      name: "Can convert single line header to block",
       code: `
 // License Header
 var react = require('react');`,
@@ -141,6 +154,7 @@ var react = require('react');`,
 var react = require('react');`
     },
     {
+      name: "Can convert multi line header to block comments",
       code: `
 // License Header Line 1
 // License Header Line 2
@@ -153,6 +167,7 @@ var react = require('react');`,
 var react = require('react');`
     },
     {
+      name: "Can convert multi line block to line comments",
       code: `
 /* License Header Line 1
  License Header Line 2 */
@@ -165,6 +180,7 @@ var react = require('react');`,
 var react = require('react');`
     },
     {
+      name: "Can fix wrong header in line comment",
       code: `
 // Not the right header
 var react = require('react');`,
@@ -175,6 +191,7 @@ var react = require('react');`,
 var react = require('react');`
     },
     {
+      name: "Can fix wrong header in block comment",
       code: `
 /* Not the right header */
 var react = require('react');`,
@@ -185,6 +202,7 @@ var react = require('react');`,
 var react = require('react');`
     },
     {
+      name: "Can fix wrong line in line comment",
       code: `
 // Copyright (c) 2022 The Brave Authors. All rights reserved.
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -208,6 +226,7 @@ var react = require('react');
 `
     },
     {
+      name: "Can fix missing year in line comment",
       code: `
 // Copyright (c) The Brave Authors. All rights reserved.
 // This Source Code Form is subject to the terms of the Mozilla Public
@@ -231,6 +250,7 @@ var react = require('react');
 `
     },
     {
+      name: "Can fix missing {YEAR} in block comment",
       code: `
 /*
  * Copyright (c) The Brave Authors. All rights reserved.
