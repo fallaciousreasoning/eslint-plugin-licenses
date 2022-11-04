@@ -1,4 +1,4 @@
-import { Options } from "./rules/header";
+import { HeaderInfo, Options } from "./rules/header";
 import { Comment, Program } from 'estree'
 import { Rule } from "eslint";
 import { generateTemplatedLine, lineMatches } from "./replacements";
@@ -21,16 +21,16 @@ export const getLeadingComments = (context: Rule.RuleContext, node: Program) => 
     return leading;
 }
 
-const generateBody = (options: Options, lines: string[]) => {
+const generateBody = (options: HeaderInfo) => {
     const padding = ''.padEnd(options.leadingSpaces ?? DEFAULT_LEADING_SPACES, ' ');
-    return lines.map(line => `${padding}${line}`.trimEnd());
+    return options.header.map(line => `${padding}${line}`.trimEnd());
 }
 
 const injectTemplateArgs = (lines: string[]) => {
     return lines.map(l => generateTemplatedLine(l));
 }
 
-const wrapComment = (options: Options, lines: string[]) => {
+const wrapComment = (options: HeaderInfo, lines: string[]) => {
     const leadingSpaces = ''.padEnd(options.leadingSpaces ?? DEFAULT_LEADING_SPACES, ' ');
     return (options.comment.prefer === 'block'
         ? `/*${lines.join('\n')}${leadingSpaces}*/`
@@ -55,16 +55,16 @@ export const validateHeader = (context: Rule.RuleContext, node: Program, options
                 return fixer
                     .insertTextBefore(node,
                         wrapComment(options,
-                            injectTemplateArgs(generateBody(options, options.header))) + '\n')
+                            injectTemplateArgs(generateBody(options))) + '\n')
             }
         });
         return;
     }
 
     const commentRange = [comments[0].range![0], comments[comments.length - 1].range![1]] as [number, number];
-    const expectedBody = generateBody(options, options.header);
+    const expectedBody = generateBody(options);
     const actualBody = getLinesFromComments(comments);
-    const alternateBodies = (options.altHeaders ?? []).map(a => generateBody(options, a));
+    const alternateBodies = (options.altHeaders ?? []).map(a => generateBody(a));
     const possibilities = [expectedBody, ...alternateBodies].map(expectLines => zip(expectLines, actualBody, '', ''));
     const possibilityValid = (possibility: [string, string][]) => possibility.every(([expected, actual]) => lineMatches(expected, actual));
     if (!possibilities.some(possibilityValid)) {

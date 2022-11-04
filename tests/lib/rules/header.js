@@ -20,7 +20,7 @@ const ruleTester = new RuleTester();
 ruleTester.run("header", rule, {
   valid: [
     {
-      name: "Real world Brave example",
+      name: "Real world Brave example (with indent)",
       code: `/* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -44,6 +44,37 @@ var react = require('react')`,
             "* License, v. 2.0. If a copy of the MPL was not distributed with this file,",
             "* You can obtain one at http://mozilla.org/MPL/2.0/."
           ]
+        ]
+      }]
+    }, {
+      name: "Real world Brave example (without indent)",
+      code: `/* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this file,
+* You can obtain one at http://mozilla.org/MPL/2.0/. */
+/* global describe, it */
+
+var react = require('react')`,
+      options: [{
+        comment: {
+          prefer: 'line',
+          allow: 'both'
+        },
+        header: [
+          "Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
+          "This Source Code Form is subject to the terms of the Mozilla Public",
+          "License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+          "you can obtain one at http://mozilla.org/MPL/2.0/."
+        ],
+        altHeaders: [
+          {
+            comment: { prefer: 'block', allow: 'block' },
+            leadingSpaces: 0,
+            header: [
+              " This Source Code Form is subject to the terms of the Mozilla Public",
+              "* License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+              "* You can obtain one at http://mozilla.org/MPL/2.0/."
+            ]
+          }
         ]
       }]
     },
