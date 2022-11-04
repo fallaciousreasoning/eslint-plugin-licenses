@@ -24,7 +24,7 @@ const generateComment = (line: string, commentOptions: { isFirstLine: boolean, i
 }
 
 const generateCommentFromLines = (lines: string[], options: Options) => {
-    return options.comments.prefer === 'block'
+    return options.comment.prefer === 'block'
         ? `/*${lines.map(l => l.trimEnd()).join('\n')}${''.padEnd(options.leadingSpaces, ' ')}*/`
         : lines.map(l => `//${l.trimEnd()}`).join('\n')
 }
@@ -53,7 +53,7 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
             fix(fixer) {
                 const comment = generateCommentFromLines(options.header
                     .map((l, i) => generateComment(l, {
-                        type: options.comments.prefer,
+                        type: options.comment.prefer,
                         isFirstLine: i === 0,
                         isLastLine: i === options.header.length - 1
                     }, options)), options)
@@ -93,7 +93,7 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
         }
     }
 
-    const badComments = comments.filter(c => !isAllowedType(c, options.comments.allow));
+    const badComments = comments.filter(c => !isAllowedType(c, options.comment.allow));
     if (badComments.length) {
         const first = badComments[0]
         context.report({
@@ -101,7 +101,7 @@ export const matchesComment = (context: Rule.RuleContext, node: Program, options
                 line: comments[0].loc?.start.line ?? 1,
                 column: comments[0].loc?.end.column ?? 1
             },
-            message: `invalid comment type (expected '${options.comments.allow}' but was '${first.type.toLowerCase()}')`,
+            message: `invalid comment type (expected '${options.comment.allow}' but was '${first.type.toLowerCase()}')`,
             fix(fixer) {
                 const lines = comments.map(c => c.value.split('\n')).flatMap(c => c);
                 const start = comments[0].range![0];

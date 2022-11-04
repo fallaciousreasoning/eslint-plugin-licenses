@@ -25,7 +25,10 @@ ruleTester.run("header", rule, {
 // License Header
 var react = require('react');
       `,
-      options: [2, 'line', ["License Header"]]
+      options: [{
+        comment: 'line',
+        header: 'License Header'
+      }]
     },
     {
       name: "Single line header with year is valid",
@@ -33,7 +36,10 @@ var react = require('react');
 // License Header 2022
 var react = require('react');
       `,
-      options: [2, 'line', ["License Header {YEAR}"]]
+      options: [{
+        comment: 'line',
+        header: "License Header {YEAR}"
+      }]
     },
     {
       name: "Single line header with year from a while back is valid",
@@ -41,7 +47,10 @@ var react = require('react');
 // License Header 1999
 var react = require('react');
       `,
-      options: [2, 'line', ["License Header {YEAR}"]]
+      options: [{
+        comment: 'line',
+        header: ["License Header {YEAR}"]
+      }]
     },
     {
       name: "Multi line header with year is valid (line comments)",
@@ -52,12 +61,15 @@ var react = require('react');
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 var react = require('react');
       `,
-      options: [2, 'line', [
-        "Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
-        "This Source Code Form is subject to the terms of the Mozilla Public",
-        "License, v. 2.0. If a copy of the MPL was not distributed with this file,",
-        "you can obtain one at http://mozilla.org/MPL/2.0/."
-      ]]
+      options: [{
+        comment: 'line',
+        header: [
+          "Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
+          "This Source Code Form is subject to the terms of the Mozilla Public",
+          "License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+          "you can obtain one at http://mozilla.org/MPL/2.0/."
+        ]
+      }]
     },
     {
       name: "Mult line header with year is valid (block comments)",
@@ -70,14 +82,17 @@ var react = require('react');
  */
 var react = require('react');
       `,
-      options: [2, 'block', [
-        "",
-        "* Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
-        "* This Source Code Form is subject to the terms of the Mozilla Public",
-        "* License, v. 2.0. If a copy of the MPL was not distributed with this file,",
-        "* you can obtain one at http://mozilla.org/MPL/2.0/.",
-        ""
-      ]]
+      options: [{
+        comment: 'block',
+        header: [
+          "",
+          "* Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
+          "* This Source Code Form is subject to the terms of the Mozilla Public",
+          "* License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+          "* you can obtain one at http://mozilla.org/MPL/2.0/.",
+          ""
+        ]
+      }]
     },
     {
       name: "Single line header is valid (block comment)",
@@ -85,7 +100,7 @@ var react = require('react');
 /* License Header */
 var react = require('react');
       `,
-      options: [2, 'block', ["License Header"]]
+      options: [{ comment: 'block', header: ["License Header"] }]
     },
     {
       name: "Single line header with non-preferred style is valid (block comment)",
@@ -93,7 +108,7 @@ var react = require('react');
 /* License Header */
 var react = require('react');
       `,
-      options: [2, 'both', ["License Header"]]
+      options: [{ comment: 'both', header: ["License Header"] }]
     },
     {
       name: "Single line header with non-preferred style is valid (line comment)",
@@ -101,7 +116,7 @@ var react = require('react');
 // License Header
 var react = require('react');
       `,
-      options: [2, 'both', ["License Header"]]
+      options: [{ comment: 'both', header: ["License Header"] }]
     },
     {
       name: "Single line header with non-preferred style is valid (line comment) (pref & allow)",
@@ -109,7 +124,10 @@ var react = require('react');
 // License Header
 var react = require('react');
       `,
-      options: [2, { prefer: 'line', allow: 'both' }, ["License Header"]]
+      options: [{
+        comment: { prefer: 'line', allow: 'both' },
+        header: ["License Header"]
+      }]
     },
     {
       name: "Single line header with non-preferred style is valid (block comment) (pref & allow)",
@@ -117,7 +135,10 @@ var react = require('react');
 // License Header
 var react = require('react');
       `,
-      options: [2, { prefer: 'block', allow: 'both' }, ["License Header"]]
+      options: [{
+        comment: { prefer: 'block', allow: 'both' },
+        header: ["License Header"]
+      }]
     }
   ],
 
@@ -125,7 +146,7 @@ var react = require('react');
     {
       name: "Can add missing single line header",
       code: "var react = require('react')",
-      options: [2, 'line', ['License Header']],
+      options: [{ comment: 'line', header: ['License Header'] }],
       errors: [{ message: "missing license", line: 1 }],
       output: `// License Header
 
@@ -136,7 +157,7 @@ var react = require('react')`
       code: `
 /* License Header */
 var react = require('react');`,
-      options: [2, 'line', ["License Header"]],
+      options: [{ comment: 'line', header: ["License Header"] }],
       errors: [{ message: "invalid comment type (expected 'line' but was 'block')" }],
       output: `
 // License Header
@@ -147,7 +168,7 @@ var react = require('react');`
       code: `
 // License Header
 var react = require('react');`,
-      options: [2, 'block', ["License Header"]],
+      options: [{ comment: 'block', header: ["License Header"] }],
       errors: [{ message: "invalid comment type (expected 'block' but was 'line')" }],
       output: `
 /* License Header */
@@ -159,7 +180,7 @@ var react = require('react');`
 // License Header Line 1
 // License Header Line 2
 var react = require('react');`,
-      options: [2, 'block', ["License Header"]],
+      options: [{ comment: 'block', header: ["License Header"] }],
       errors: [{ message: "invalid comment type (expected 'block' but was 'line')" }],
       output: `
 /* License Header Line 1
@@ -172,7 +193,7 @@ var react = require('react');`
 /* License Header Line 1
  License Header Line 2 */
 var react = require('react');`,
-      options: [2, 'line', ["License Header"]],
+      options: [{ comment: 'line', header: ["License Header"] }],
       errors: [{ message: "invalid comment type (expected 'line' but was 'block')" }],
       output: `
 // License Header Line 1
@@ -184,7 +205,7 @@ var react = require('react');`
       code: `
 // Not the right header
 var react = require('react');`,
-      options: [2, 'line', ["License Header"]],
+      options: [{ comment: 'line', header: ["License Header"] }],
       errors: [{ message: "incorrect license line" }],
       output: `
 // License Header
@@ -195,7 +216,7 @@ var react = require('react');`
       code: `
 /* Not the right header */
 var react = require('react');`,
-      options: [2, 'block', ["License Header"]],
+      options: [{ comment: 'block', header: ["License Header"] }],
       errors: [{ message: "incorrect license line" }],
       output: `
 /* License Header */
@@ -210,12 +231,15 @@ var react = require('react');`
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 var react = require('react');
 `,
-      options: [2, 'line', [
-        "Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
-        "This Source Code Form is subject to the terms of the Mozilla Public",
-        "License, v. 2.0. If a copy of the MPL was not distributed with this file,",
-        "you can obtain one at http://mozilla.org/MPL/2.0/."
-      ]],
+      options: [{
+        comment: 'line',
+        header: [
+          "Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
+          "This Source Code Form is subject to the terms of the Mozilla Public",
+          "License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+          "you can obtain one at http://mozilla.org/MPL/2.0/."
+        ]
+      }],
       errors: [{ message: "incorrect license line" }],
       output: `
 // Copyright (c) 2022 The Brave Authors. All rights reserved.
@@ -234,12 +258,15 @@ var react = require('react');
 // you can obtain one at http://mozilla.org/MPL/2.0/.
 var react = require('react');
 `,
-      options: [2, 'line', [
-        "Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
-        "This Source Code Form is subject to the terms of the Mozilla Public",
-        "License, v. 2.0. If a copy of the MPL was not distributed with this file,",
-        "you can obtain one at http://mozilla.org/MPL/2.0/."
-      ]],
+      options: [{
+        comment: 'line',
+        header: [
+          "Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
+          "This Source Code Form is subject to the terms of the Mozilla Public",
+          "License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+          "you can obtain one at http://mozilla.org/MPL/2.0/."
+        ]
+      }],
       errors: [{ message: "incorrect license line" }],
       output: `
 // Copyright (c) 2022 The Brave Authors. All rights reserved.
@@ -260,14 +287,17 @@ var react = require('react');
  */
 var react = require('react');
 `,
-      options: [2, 'block', [
-        "",
-        "* Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
-        "* This Source Code Form is subject to the terms of the Mozilla Public",
-        "* License, v. 2.0. If a copy of the MPL was not distributed with this file,",
-        "* you can obtain one at http://mozilla.org/MPL/2.0/.",
-        ""
-      ]],
+      options: [{
+        comment: 'block',
+        header: [
+          "",
+          "* Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
+          "* This Source Code Form is subject to the terms of the Mozilla Public",
+          "* License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+          "* you can obtain one at http://mozilla.org/MPL/2.0/.",
+          ""
+        ]
+      }],
       errors: [{ message: "incorrect license line" }],
       output: `
 /*
@@ -287,12 +317,15 @@ var react = require('react');
 // License, v. 2.0. If a copy of the MPL was not distributed with this file,
 var react = require('react');
 `,
-      options: [2, 'line', [
-        "Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
-        "This Source Code Form is subject to the terms of the Mozilla Public",
-        "License, v. 2.0. If a copy of the MPL was not distributed with this file,",
-        "you can obtain one at http://mozilla.org/MPL/2.0/.",
-      ]],
+      options: [{
+        comment: 'line',
+        header: [
+          "Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
+          "This Source Code Form is subject to the terms of the Mozilla Public",
+          "License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+          "you can obtain one at http://mozilla.org/MPL/2.0/.",
+        ]
+      }],
       errors: [{ message: "incorrect license" }],
       output: `
 // Copyright (c) 2022 The Brave Authors. All rights reserved.
@@ -313,14 +346,17 @@ var react = require('react');
  */
 var react = require('react');
 `,
-      options: [2, 'block', [
-        "",
-        "* Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
-        "* This Source Code Form is subject to the terms of the Mozilla Public",
-        "* License, v. 2.0. If a copy of the MPL was not distributed with this file,",
-        "* you can obtain one at http://mozilla.org/MPL/2.0/.",
-        ""
-      ]],
+      options: [{
+        comment: 'block',
+        header: [
+          "",
+          "* Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
+          "* This Source Code Form is subject to the terms of the Mozilla Public",
+          "* License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+          "* you can obtain one at http://mozilla.org/MPL/2.0/.",
+          ""
+        ]
+      }],
       errors: [{ message: "incorrect license" }],
       output: `
 /*
@@ -342,14 +378,17 @@ var react = require('react');
 * You can obtain one at http://mozilla.org/MPL/2.0/. */
 var react = require('react');
 `,
-      options: [2, 'block', [
-        "",
-        "* Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
-        "* This Source Code Form is subject to the terms of the Mozilla Public",
-        "* License, v. 2.0. If a copy of the MPL was not distributed with this file,",
-        "* you can obtain one at http://mozilla.org/MPL/2.0/.",
-        ""
-      ]],
+      options: [{
+        comment: 'block',
+        header: [
+          "",
+          "* Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
+          "* This Source Code Form is subject to the terms of the Mozilla Public",
+          "* License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+          "* you can obtain one at http://mozilla.org/MPL/2.0/.",
+          ""
+        ]
+      }],
       errors: [{ message: "incorrect license" }],
       output: `
 /*

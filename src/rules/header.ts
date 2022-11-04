@@ -11,15 +11,15 @@ type Header = string[]
 
 type OptionsArr = [string | number, string | CommentOptions, Header]
 export interface Options {
-    comments: CommentOptions,
+    comment: CommentOptions,
 
     // Number of spaces before each line of the comment.
-    leadingSpaces: number,
+    leadingSpaces?: number,
 
     // Number of trailing newlines after the header.
-    trailingNewLines: number,
+    trailingNewLines?: number,
     header: Header,
-    altHeaders: Header[]
+    altHeaders?: Header[]
 }
 
 module.exports = {
@@ -32,50 +32,58 @@ module.exports = {
         },
         fixable: 'code',
         schema: [{
-            type: 'number'
-        }, {
-            oneOf: [
-                { type: 'string', enum: ['line', 'block', 'both'] },
-                {
-                    type: 'object',
-                    properties: {
-                        allow: {
-                            enum: ['line', 'block', 'both']
-                        },
-                        prefer: {
-                            enum: ['line', 'block']
+            type: 'object',
+            properties: {
+                comment: {
+                    oneOf: [
+                        { type: 'string', enum: ['line', 'block', 'both'] },
+                        {
+                            type: 'object',
+                            properties: {
+                                allow: {
+                                    enum: ['line', 'block', 'both']
+                                },
+                                prefer: {
+                                    enum: ['line', 'block']
+                                }
+                            }
                         }
-                    }
+                    ]
+                },
+                header: {
+                    oneOf: [
+                        { type: 'string' },
+                        {
+                            type: 'array',
+                            items: {
+                                type: 'string'
+                            }
+                        }
+                    ]
                 }
-            ]
-        }, {
-            oneOf: [{
-                type: 'string'
-            }, {
-                type: 'array',
-                items: {
-                    type: 'string'
-                }
-            }]
+            }
         }], // Add a schema if the rule has options
     },
 
     create(context) {
-        const [level, mode, header] = context.options as OptionsArr
+        const [rawOptions] = context.options as [Options]
+        const options: Options = {
+            leadingSpaces: 1,
+            trailingNewLines: 1,
+            ...rawOptions,
+            header: (typeof rawOptions.header === "string" ? [rawOptions.header] : rawOptions.header)
+                .flatMap(l => l.split('\n')),
+            comment: typeof rawOptions.comment !== "object"
+            ? {
+                allow: rawOptions.comment || 'line',
+                prefer: rawOptions.comment || 'line'
+            } : rawOptions.comment
+        }
 
         return {
             Program(node) {
                 const comments = getLeadingComments(context, node);
-                matchesComment(context, node, {
-                    comments: typeof mode === "string" ? {
-                        allow: mode,
-                        prefer: mode
-                    } : mode as any,
-                    header: header,
-                    leadingSpaces: 1,
-                    trailingNewLines: 1,
-                    altHeaders: []
-                }, comments)
+                matchesComment(context, node, options, comments)
             }
         }
     },
