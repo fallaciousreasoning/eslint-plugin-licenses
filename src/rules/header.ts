@@ -70,6 +70,15 @@ module.exports = {
                             }
                         }
                     ]
+                },
+                altHeaders: {
+                    type: 'array',
+                    items: {
+                        oneOf: [
+                            { type: 'string' },
+                            { type: 'array', items: { type: 'string' } }
+                        ]
+                    }
                 }
             }
         }], // Add a schema if the rule has options
@@ -80,14 +89,15 @@ module.exports = {
         const options: Options = {
             leadingSpaces: 1,
             trailingNewLines: 1,
+            altHeaders: [],
             ...rawOptions,
             header: (typeof rawOptions.header === "string" ? [rawOptions.header] : rawOptions.header)
                 .flatMap(l => l.split('\n')),
             comment: typeof rawOptions.comment !== "object"
-            ? {
-                allow: rawOptions.comment || 'line',
-                prefer: rawOptions.comment || 'line'
-            } : rawOptions.comment
+                ? {
+                    allow: rawOptions.comment || 'line',
+                    prefer: rawOptions.comment || 'line'
+                } : rawOptions.comment
         }
 
         return {
