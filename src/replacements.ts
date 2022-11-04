@@ -25,7 +25,6 @@ export const lineMatches = (headerLine: string, comment: string) => {
         if (!replacement) {
             const ss = comment.substring(index, index + part.length)
             if (part !== ss) {
-                console.log(part, '!==', ss)
                 return false;
             }
             index += part.length;

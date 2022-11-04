@@ -1,5 +1,5 @@
 import eslint from 'eslint'
-import { getLeadingComments, matchesComment } from '../commentHelper'
+import { validateHeader } from '../commentHelper'
 
 type CommentType = 'line' | 'block'
 type CommentOptions = {
@@ -58,7 +58,6 @@ module.exports = {
                 trailingNewlines: {
                     type: 'number',
                     minimum: 0,
-                    default: 1,
                 },
                 header: {
                     oneOf: [
@@ -88,7 +87,6 @@ module.exports = {
         const [rawOptions] = context.options as [Options]
         const options: Options = {
             leadingSpaces: 1,
-            trailingNewLines: 1,
             ...rawOptions,
             header: (typeof rawOptions.header === "string" ? [rawOptions.header] : rawOptions.header)
                 .flatMap(l => l.split('\n')),
@@ -103,8 +101,7 @@ module.exports = {
 
         return {
             Program(node) {
-                const comments = getLeadingComments(context, node);
-                matchesComment(context, node, options, comments)
+                validateHeader(context, node, options)
             }
         }
     },

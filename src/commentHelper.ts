@@ -1,7 +1,10 @@
-import { Rule } from "eslint";
-import { Comment, Program } from 'estree';
-import { generateTemplatedLine, lineMatches } from "./replacements";
 import { Options } from "./rules/header";
+import { Comment, Program } from 'estree'
+import { Rule } from "eslint";
+import { generateTemplatedLine, lineMatches } from "./replacements";
+
+const DEFAULT_LEADING_SPACES = 1;
+const DEFAULT_TRAILING_NEWLINES = 0;
 
 export const getLeadingComments = (context: Rule.RuleContext, node: Program) => {
     const sourceCode = context.getSourceCode()
@@ -14,101 +17,77 @@ export const getLeadingComments = (context: Rule.RuleContext, node: Program) => 
     return leading;
 }
 
-const isAllowedType = (comment: Comment, modes: 'line' | 'block' | 'both') => {
-    return comment.type.toLowerCase() === modes || modes === 'both';
+const generateBody = (options: Options) => {
+    const padding = ''.padEnd(options.leadingSpaces ?? DEFAULT_LEADING_SPACES, ' ');
+    return options.header.map(line => `${padding}${line}`.trimEnd());
 }
 
-const generateComment = (line: string, commentOptions: { isFirstLine: boolean, isLastLine: boolean, type: 'line' | 'block' }, options: Options) => {
-    const padding = ''.padStart(options.leadingSpaces, ' ')
-    return `${padding}${generateTemplatedLine(line)}${commentOptions.isLastLine && commentOptions.type === 'block' ? padding : ''}`
+const injectTemplateArgs = (lines: string[]) => {
+    return lines.map(l => generateTemplatedLine(l));
 }
 
-const generateCommentFromLines = (lines: string[], options: Options) => {
-    return options.comment.prefer === 'block'
-        ? `/*${lines.map(l => l.trimEnd()).join('\n')}${''.padEnd(options.leadingSpaces, ' ')}*/`
-        : lines.map(l => `//${l.trimEnd()}`).join('\n')
+const wrapComment = (mode: 'line' | 'block', options: Options, lines: string[]) => {
+    const leadingSpaces = ''.padEnd(options.leadingSpaces ?? DEFAULT_LEADING_SPACES, ' ');
+    return (mode === 'block'
+        ? `/*${lines.join('\n')}${leadingSpaces}*/`
+        : lines.map(l => `//${l.trimEnd()}`).join('\n'));
 }
 
-export const matchesComment = (context: Rule.RuleContext, node: Program, options: Options, comments: Comment[]) => {
-    comments = comments.slice(0, options.header.length + 1);
+const getLinesFromComments = (comments: Comment[]) => {
+    return comments.flatMap(c => c.value.split('\n'));
+}
 
-    const commentLines: {
-        comment: Comment,
-        line: string
-    }[] = []
-    for (const comment of comments) {
-        const splitLines = comment.value.split('\n');
-        for (const line of splitLines) {
-            commentLines.push({
-                line,
-                comment
-            })
-        }
-    }
+const anyInvalid = (comments: Comment[], options: Options) => {
+    return comments.some(c => c.type.toLowerCase() !== options.comment.allow && options.comment.allow !== 'both');
+}
 
-    if (options.header.length > commentLines.length) {
+export const validateHeader = (context: Rule.RuleContext, node: Program, options: Options) => {
+    const comments = getLeadingComments(context, node);
+    if (!comments.length) {
         context.report({
             loc: { line: 1, column: 1 },
-            message: comments.length ? 'incorrect license' : 'missing license',
+            message: 'missing license',
             fix(fixer) {
-                const comment = generateCommentFromLines(options.header
-                    .map((l, i) => generateComment(l, {
-                        type: options.comment.prefer,
-                        isFirstLine: i === 0,
-                        isLastLine: i === options.header.length - 1
-                    }, options)), options)
-                + ''.padEnd(options.trailingNewLines, '\n');
-
-                if (comments.length) {
-                    return fixer.replaceTextRange([comments[0].range![0], comments[comments.length - 1].range![1]], comment);
-                }
-                return fixer.insertTextBefore(node, comment + '\n');
+                return fixer
+                    .insertTextBefore(node,
+                        wrapComment(options.comment.prefer,
+                            options,
+                            injectTemplateArgs(generateBody(options))) + '\n')
             }
         });
         return;
     }
 
-    for (let i = 0; i < options.header.length; ++i) {
-        const headerLine = options.header[i];
-        const expected = ''.padStart(options.leadingSpaces, ' ') + headerLine;
-
-        const { comment, line } = commentLines[i];
-        const actual = line.trimEnd();
-
-        if (!lineMatches(expected, actual)) {
-            context.report({
-                loc: comment.loc as any,
-                message: `incorrect license line`,
-                node: comment as any,
-                fix(fixer) {
-                    const start = 2 + comment.value.indexOf(line) + comment.range![0]
-                    const end = start + line.length
-                    return fixer.replaceTextRange([start, end], generateComment(headerLine, {
-                        type: comment.type.toLowerCase() as any,
-                        isFirstLine: i === 0,
-                        isLastLine: i === options.header.length - 1
-                    }, options))
-                }
-            })
-        }
-    }
-
-    const badComments = comments.filter(c => !isAllowedType(c, options.comment.allow));
-    if (badComments.length) {
-        const first = badComments[0]
+    const commentRange = [comments[0].range![0], comments[comments.length - 1].range![1]] as [number, number];
+    const expectedBody = generateBody(options);
+    const actualBody = getLinesFromComments(comments);
+    const zipped = Array.from(Array(Math.max(expectedBody.length, actualBody.length)), (_, i) => [expectedBody[i] || '', actualBody[i] || '']);
+    if (zipped.some(([expected, actual]) => !lineMatches(expected, actual))) {
         context.report({
             loc: {
-                line: comments[0].loc?.start.line ?? 1,
-                column: comments[0].loc?.end.column ?? 1
+                start: comments[0].loc!.start,
+                end: comments[comments.length - 1].loc!.end
             },
-            message: `invalid comment type (expected '${options.comment.allow}' but was '${first.type.toLowerCase()}')`,
+            message: `incorrect license`,
             fix(fixer) {
-                const lines = comments.map(c => c.value.split('\n')).flatMap(c => c);
-                const start = comments[0].range![0];
-                const end = comments[comments.length - 1].range![1];
-                return fixer.replaceTextRange([start, end], generateCommentFromLines(lines, options))
+                return fixer
+                    .replaceTextRange(commentRange,
+                        wrapComment(comments[0].type.toLowerCase() as any, options, injectTemplateArgs(expectedBody)))
+            }
+        })
+    }
+
+    if (anyInvalid(comments, options)) {
+        context.report({
+            loc: {
+                start: comments[0].loc!.start,
+                end: comments[comments.length - 1].loc!.end
+            },
+            message: `invalid comment type (expected '${options.comment.allow}' but was '${options.comment.allow === 'line' ? 'block' : 'line'}')`,
+            fix(fixer) {
+                return fixer
+                    .replaceTextRange(commentRange, wrapComment(options.comment.prefer, options, actualBody))
             }
         })
     }
 }
-
