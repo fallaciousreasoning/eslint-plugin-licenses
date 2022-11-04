@@ -20,6 +20,34 @@ const ruleTester = new RuleTester();
 ruleTester.run("header", rule, {
   valid: [
     {
+      name: "Real world Brave example",
+      code: `/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+/* global describe, it */
+
+var react = require('react')`,
+      options: [{
+        comment: {
+          prefer: 'line',
+          allow: 'both'
+        },
+        header: [
+          "Copyright (c) {YEAR} The Brave Authors. All rights reserved.",
+          "This Source Code Form is subject to the terms of the Mozilla Public",
+          "License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+          "you can obtain one at http://mozilla.org/MPL/2.0/."
+        ],
+        altHeaders: [
+          [
+            "This Source Code Form is subject to the terms of the Mozilla Public",
+            "* License, v. 2.0. If a copy of the MPL was not distributed with this file,",
+            "* You can obtain one at http://mozilla.org/MPL/2.0/."
+          ]
+        ]
+      }]
+    },
+    {
       name: "Single line header is valid",
       code: `
 // License Header
