@@ -6,6 +6,10 @@ import { generateTemplatedLine, lineMatches } from "./replacements";
 const DEFAULT_LEADING_SPACES = 1;
 const DEFAULT_TRAILING_NEWLINES = 0;
 
+const zip = <A, B>(a: A[], b: B[], defaultA: A = undefined as any, defaultB: B=undefined as any): [A, B][] => {
+    return Array.from(Array(Math.max(a.length, b.length)), (_, i) => [a[i] ?? defaultA, b[i] ?? defaultB]);
+}
+
 export const getLeadingComments = (context: Rule.RuleContext, node: Program) => {
     const sourceCode = context.getSourceCode()
     const leading = sourceCode.getCommentsBefore(node);
@@ -17,9 +21,9 @@ export const getLeadingComments = (context: Rule.RuleContext, node: Program) => 
     return leading;
 }
 
-const generateBody = (options: Options) => {
+const generateBody = (options: Options, lines: string[]) => {
     const padding = ''.padEnd(options.leadingSpaces ?? DEFAULT_LEADING_SPACES, ' ');
-    return options.header.map(line => `${padding}${line}`.trimEnd());
+    return lines.map(line => `${padding}${line}`.trimEnd());
 }
 
 const injectTemplateArgs = (lines: string[]) => {
@@ -52,17 +56,19 @@ export const validateHeader = (context: Rule.RuleContext, node: Program, options
                     .insertTextBefore(node,
                         wrapComment(options.comment.prefer,
                             options,
-                            injectTemplateArgs(generateBody(options))) + '\n')
+                            injectTemplateArgs(generateBody(options, options.header))) + '\n')
             }
         });
         return;
     }
 
     const commentRange = [comments[0].range![0], comments[comments.length - 1].range![1]] as [number, number];
-    const expectedBody = generateBody(options);
+    const expectedBody = generateBody(options, options.header);
     const actualBody = getLinesFromComments(comments);
-    const zipped = Array.from(Array(Math.max(expectedBody.length, actualBody.length)), (_, i) => [expectedBody[i] || '', actualBody[i] || '']);
-    if (zipped.some(([expected, actual]) => !lineMatches(expected, actual))) {
+    const alternateBodies = (options.altHeaders ?? []).map(a => generateBody(options, a));
+    const possibilities = [expectedBody, ...alternateBodies].map(expectLines => zip(expectLines, actualBody, '', ''));
+    const possibilityValid = (possibility: [string, string][]) => possibility.every(([expected, actual]) => lineMatches(expected, actual));
+    if (!possibilities.some(possibilityValid)) {
         context.report({
             loc: {
                 start: comments[0].loc!.start,
