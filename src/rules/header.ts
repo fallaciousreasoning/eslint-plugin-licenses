@@ -89,10 +89,11 @@ module.exports = {
         const options: Options = {
             leadingSpaces: 1,
             trailingNewLines: 1,
-            altHeaders: [],
             ...rawOptions,
             header: (typeof rawOptions.header === "string" ? [rawOptions.header] : rawOptions.header)
                 .flatMap(l => l.split('\n')),
+            altHeaders: (rawOptions.altHeaders ?? [])
+                .map(alt => (typeof alt === "string" ? [alt] : alt).flatMap(l => l.split('\n'))),
             comment: typeof rawOptions.comment !== "object"
                 ? {
                     allow: rawOptions.comment || 'line',
