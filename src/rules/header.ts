@@ -50,6 +50,16 @@ module.exports = {
                         }
                     ]
                 },
+                leadingSpaces: {
+                    type: 'number',
+                    minimum: 0,
+                    default: 1,
+                },
+                trailingNewlines: {
+                    type: 'number',
+                    minimum: 0,
+                    default: 1,
+                },
                 header: {
                     oneOf: [
                         { type: 'string' },
