@@ -6,7 +6,7 @@ import { generateTemplatedLine, lineMatches } from "./replacements";
 const DEFAULT_LEADING_SPACES = 1;
 const DEFAULT_TRAILING_NEWLINES = 0;
 
-const zip = <A, B>(a: A[], b: B[], defaultA: A = undefined as any, defaultB: B=undefined as any): [A, B][] => {
+const zip = <A, B>(a: A[], b: B[], defaultA: A = undefined as any, defaultB: B = undefined as any): [A, B][] => {
     return Array.from(Array(Math.max(a.length, b.length)), (_, i) => [a[i] ?? defaultA, b[i] ?? defaultB]);
 }
 
@@ -30,9 +30,9 @@ const injectTemplateArgs = (lines: string[]) => {
     return lines.map(l => generateTemplatedLine(l));
 }
 
-const wrapComment = (mode: 'line' | 'block', options: Options, lines: string[]) => {
+const wrapComment = (options: Options, lines: string[]) => {
     const leadingSpaces = ''.padEnd(options.leadingSpaces ?? DEFAULT_LEADING_SPACES, ' ');
-    return (mode === 'block'
+    return (options.comment.prefer === 'block'
         ? `/*${lines.join('\n')}${leadingSpaces}*/`
         : lines.map(l => `//${l.trimEnd()}`).join('\n'));
 }
@@ -54,8 +54,7 @@ export const validateHeader = (context: Rule.RuleContext, node: Program, options
             fix(fixer) {
                 return fixer
                     .insertTextBefore(node,
-                        wrapComment(options.comment.prefer,
-                            options,
+                        wrapComment(options,
                             injectTemplateArgs(generateBody(options, options.header))) + '\n')
             }
         });
@@ -78,12 +77,10 @@ export const validateHeader = (context: Rule.RuleContext, node: Program, options
             fix(fixer) {
                 return fixer
                     .replaceTextRange(commentRange,
-                        wrapComment(comments[0].type.toLowerCase() as any, options, injectTemplateArgs(expectedBody)))
+                        wrapComment(options, injectTemplateArgs(expectedBody)))
             }
         })
-    }
-
-    if (anyInvalid(comments, options)) {
+    } else if (anyInvalid(comments, options)) {
         context.report({
             loc: {
                 start: comments[0].loc!.start,
@@ -92,7 +89,7 @@ export const validateHeader = (context: Rule.RuleContext, node: Program, options
             message: `invalid comment type (expected '${options.comment.allow}' but was '${options.comment.allow === 'line' ? 'block' : 'line'}')`,
             fix(fixer) {
                 return fixer
-                    .replaceTextRange(commentRange, wrapComment(options.comment.prefer, options, actualBody))
+                    .replaceTextRange(commentRange, wrapComment(options, actualBody))
             }
         })
     }
