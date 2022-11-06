@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-licenses",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Ensures all source files have a license header",
   "keywords": [
     "eslint",
@@ -32,5 +32,5 @@
   "peerDependencies": {
     "eslint": ">=7"
   },
-  "license": "ISC"
+  "license": "MIT"
 }
