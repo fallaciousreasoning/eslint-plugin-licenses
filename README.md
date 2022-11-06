@@ -29,18 +29,68 @@ Add `licenses` to the plugins section of your `.eslintrc` configuration file. Yo
 ```
 
 
-Then configure the rules you want to use under the rules section.
+Then configure the header you want to use
 
 ```json
 {
     "rules": {
-        "licenses/rule-name": 2
+        "licenses/header": [
+            2,
+            {
+                "comment": "line",
+                "header": [
+                    "Copyright (c) {YEAR} fallaciousreasoning. All rights reserved."
+                ]
+            }
+        ]
     }
 }
 ```
 
-## Supported Rules
+The {YEAR} placeholder will be generated as the current year when running `eslint --fix` and will match any year (including ones in the future).
 
-* Fill in provided rules here
+If you have existing headers with different formats, you can add them as `altHeaders`
+
+```json
+{
+    "rules": {
+        "licenses/header": [
+            2,
+            {
+                "comment": "line",
+                "header": [
+                    "Copyright (c) {YEAR} fallaciousreasoning. All rights reserved."
+                ],
+                "altHeaders": [
+                    {
+                        "comment": "block",
+                        "header": [
+                            "",
+                            "Copyright (c) Me, always & forever",
+                            ""
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
+```
+
+This will match the headers
+
+```js
+// Copyright (c) 2022 fallaciousreasoning. All rights reserved
+```
+
+and
+
+```js
+/*
+ * Copyright (c) Me, always & forever
+ */
+```
+
+but when generating fixes will use the first format.
 
 
