@@ -26,10 +26,6 @@ const generateBody = (options: HeaderInfo) => {
     return options.header.map(line => `${padding}${line}`.trimEnd());
 }
 
-const injectTemplateArgs = (lines: string[]) => {
-    return lines.map(l => generateTemplatedLine(l));
-}
-
 const wrapComment = (options: HeaderInfo, lines: string[]) => {
     const leadingSpaces = ''.padEnd(options.leadingSpaces ?? DEFAULT_LEADING_SPACES, ' ');
     return (options.comment.prefer === 'block'
@@ -46,6 +42,10 @@ const anyInvalid = (comments: Comment[], options: Options) => {
 }
 
 export const validateHeader = (context: Rule.RuleContext, node: Program, options: Options) => {
+    const injectTemplateArgs = (lines: string[]) => {
+        return lines.map(l => generateTemplatedLine(l, context.getFilename(), options));
+    }
+
     const comments = getLeadingComments(context, node);
     if (!comments.length) {
         context.report({

@@ -13,6 +13,10 @@ export interface HeaderInfo {
     comment: CommentOptions
     header: Header
 
+    // Try and use the year the file was created when setting the {YEAR}
+    // variable. Otherwise the current year will be used.
+    tryUseCreatedYear?: boolean;
+
     // Number of spaces before each line of the comment.
     leadingSpaces?: number,
 
@@ -42,6 +46,9 @@ const headerValidator = {
                     }
                 }
             ]
+        },
+        tryUseCreatedYear: {
+            type: 'boolean'
         },
         leadingSpaces: {
             type: 'number',
