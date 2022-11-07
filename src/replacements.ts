@@ -46,6 +46,9 @@ export const lineMatches = (headerLine: string, comment: string) => {
 
 export const generateTemplatedLine = (line: string, filePath: string, headerInfo: HeaderInfo) => {
     for (const [replace, entry] of Object.entries(replacements)) {
+        // Don't generate the template, unless we need to - it can be expensive.
+        if (!line.includes(replace)) continue;
+
         line = line.replace(replace, entry.template(filePath, headerInfo))
     }
     return line;
