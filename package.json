@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-licenses",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "Ensures all source files have a license header",
   "keywords": [
     "eslint",
@@ -20,23 +20,24 @@
   "main": "./lib/index.js",
   "exports": "./lib/index.js",
   "scripts": {
+    "build": "tsc",
     "lint": "eslint .",
     "test": "mocha tests --recursive"
   },
   "devDependencies": {
     "@types/node": "^18.11.9",
-    "@types/eslint": "^8.4.9",
-    "typescript": "^4.8.4",
-    "eslint": "^8.19.0",
-    "eslint-plugin-eslint-plugin": "^5.0.0",
-    "eslint-plugin-node": "^11.1.0",
+    "@types/eslint": "^9.6.0",
+    "typescript": "^5.0.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-eslint-plugin": "^6.0.0",
+    "eslint-plugin-n": "^17.0.0",
     "mocha": "^10.0.0"
   },
   "engines": {
-    "node": "^14.17.0 || ^16.0.0 || >= 18.0.0"
+    "node": "^18.18.0 || ^20.0.0 || >=22.0.0"
   },
   "peerDependencies": {
-    "eslint": ">=7"
+    "eslint": ">=8.40.0"
   },
   "license": "MIT"
 }

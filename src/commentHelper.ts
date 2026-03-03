@@ -11,8 +11,9 @@ const zip = <A, B>(a: A[], b: B[], defaultA: A = undefined as any, defaultB: B =
 }
 
 export const getLeadingComments = (context: Rule.RuleContext, node: Program) => {
-    const sourceCode = context.getSourceCode()
-    const leading = sourceCode.getCommentsBefore(node);
+    const sourceCode = context.sourceCode
+    const firstToken = sourceCode.getFirstToken(node as any);
+    const leading = firstToken ? sourceCode.getCommentsBefore(firstToken) : [];
 
     if (leading.length && leading[0].type === "Block") {
         return [leading[0]];
@@ -43,7 +44,7 @@ const anyInvalid = (comments: Comment[], options: Options) => {
 
 export const validateHeader = (context: Rule.RuleContext, node: Program, options: Options) => {
     const injectTemplateArgs = (lines: string[]) => {
-        return lines.map(l => generateTemplatedLine(l, context.getFilename(), options));
+        return lines.map(l => generateTemplatedLine(l, context.filename, options));
     }
 
     const comments = getLeadingComments(context, node);
